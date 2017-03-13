@@ -3,20 +3,20 @@
 > Project Restful API is built on the <a href="https://nodejs.org/en/" target="_blank" rel="help">NodeJS</a> platform. The main module which providing communication http and supporting middlewares is <a href="https://expressjs.com/" target="_blank" rel="help">ExpressJS</a>.
 
 API in currently available configuration has:
-- settings file **project.config.js** which allows to define supported languages in routing and location of directory containing static files,
-- data file **project.data.json**,
-- defined host and port (**http://localhost:4000**),
+- settings file project.config.js which allows to define supported languages in routing and location of directory containing static files,
+- data file project.data.json,
+- defined host and port (http://localhost:4000),
 - enabled all Cross-Origin Resource Sharing (CORS) requests via <a href="https://github.com/expressjs/cors#cors" target="_blank" rel="help">cors</a> middleware,
 - parser incoming request bodies before your handler start via <a href="https://github.com/expressjs/body-parser#body-parser" target="_blank" rel="help">body-parser</a> middleware,
 - compressor response bodies for all request via <a href="https://github.com/expressjs/compression#compression" target="_blank" rel="help">compression</a> middleware,
-- simple routing which allows to navigate through pages in different languages (try **http://localhost:4000/pl** or **http://localhost:4000/en**).
+- simple routing which allows to navigate through pages in different languages (/pl or /en).
 
-This configuration is related to my other project <a href="https://github.com/mateuszarchicinski/Angular1.x-Template" target="_blank" rel="help">Angular 1.x - Template</a> in which I use Restful API server-side to return main application file (**index-pl.html** or **index-en.html**) and the rest of routing takes place on client side.
+This configuration is related to my other project <a href="https://github.com/mateuszarchicinski/Angular1.x-Template" target="_blank" rel="help">Angular 1.x - Template</a> in which I use Restful API server-side to return main application file (index-pl.html or index-en.html) and the rest of routing takes place on client side.
 
 ## Usage
 Project is available only via Github repository.
 
-In case usage **app.js** file in your own environment which provides automatic application run. Remember to install all required modules for proper work API. Use this command in console:
+In case usage app.js file in your own environment which provides automatic application run. Remember to install all required modules for proper work API. Use this command in console:
 ```
 npm install --production
 ```
