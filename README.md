@@ -1,9 +1,9 @@
 # Restful API - NodeJS & ExpressJS
 
-> Project Restful API is built on the <a href="https://nodejs.org/en/" target="_blank" rel="help">NodeJS</a> platform. The main module which providing communication http and supporting middlewares is <a href="https://expressjs.com/" target="_blank" rel="help">ExpressJS</a>.
+> Project Restful API is built on the <a href="https://nodejs.org/en/" target="_blank" rel="help">NodeJS</a> platform. The main module which providing communication HTTP and supporting middlewares is <a href="https://expressjs.com/" target="_blank" rel="help">ExpressJS</a>.
 
 API in currently available configuration has:
-- settings file project.config.js which allows to define supported languages in routing and location of directory containing static files,
+- settings file project.config.js which allows defining supported languages in routing and location of directory containing static files,
 - data file project.data.json,
 - defined host and port (http://localhost:4000),
 - enabled all Cross-Origin Resource Sharing (CORS) requests via <a href="https://github.com/expressjs/cors#cors" target="_blank" rel="help">cors</a> middleware,
@@ -21,12 +21,12 @@ In case usage app.js file in your own environment which provides automatic appli
 npm install --production
 ```
 
-However if you work with API locally install all modules using the comand:
+However, if you work with API locally install all modules using command:
 ```
 npm install
 ```
 
-It will install tool called <a href="https://nodemon.io/" target="_blank" rel="help">Nodemon</a> which will monitor for any changes in API source and automatically restart created server. Simply run using the comand:
+It will install tool called <a href="https://nodemon.io/" target="_blank" rel="help">Nodemon</a> which will monitor for any changes in API source and automatically restart created server. Simply run using command:
 ```
 nodemon app
 ```
