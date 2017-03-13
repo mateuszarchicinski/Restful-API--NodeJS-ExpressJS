@@ -28,7 +28,7 @@ app.set('port', process.env.NODE_PORT || 4000);
 app.use(cors());
 
 
-// Parses incoming request bodies before your handler, more info about BODY PARSER middleware ---> https://github.com/expressjs/body-parser#body-parser
+// Parses incoming request bodies before your handler start, more info about BODY PARSER middleware ---> https://github.com/expressjs/body-parser#body-parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
