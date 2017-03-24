@@ -22,6 +22,10 @@ function alertHandler (args) {
     
     args = args || {};
     
+    if (app.get('env') === 'production' && args.type !== 'error') {
+        return;
+    }
+    
     let types = {
         normal: 'white',
         success: 'green',
@@ -76,7 +80,23 @@ function createPageRedirect (args) {
 };
 
 
-// To get supported language as a value (string)
+// To get request protocol as a value (string) or false (boolean)
+function getProtocol (req) {
+    
+    if (!req) {
+        return false;
+    }
+    
+    let protocol = req.connection.encrypted ? 'https' : 'http';
+    
+    protocol = req.headers['x-forwarded-proto'] || protocol;
+    
+    return protocol.split(/\s*,\s*/)[0];
+    
+};
+
+
+// To get supported language as a value (object)
 function getLang (arg) {
     
     return {
@@ -136,6 +156,10 @@ function routeHandler (params) {
     
     // In case of MODE: Angular
     if (PROJECT_CONFIG.MODE === 'Angular') {
+        if (!langObj.existed && !pageObj.existed && params[0] || params.url === '///') {
+            return createPageRedirect( {url: '/'} );
+        }
+        
         return {
             statusCode: PROJECT_CONFIG.HTTP_CODE.SUCCESS,
             fileFullName: createFileFullName('index', langObj.value || PROJECT_CONFIG.LANGUAGES[0]),
@@ -190,17 +214,13 @@ app.use(compression({threshold: 0}));
 
 
 // Redirects all insecure requests to secure protocol HTTPS only in production environment
-/*
 if (app.get('env') === 'production') {
     
     app.use((req, res, next) => {
-        let protocol = req.get('x-forwarded-proto');
-        
-        protocol === 'https' ? next() : res.redirect('https://' + req.hostname + req.url);
+        return getProtocol(req) === 'https' ? next() : res.redirect(PROJECT_CONFIG.HTTP_CODE.REDIRECT, 'https://' + req.hostname + req.url);
     });
     
 }
-*/
 
 
 // Serves static files from the directory, which is defined in the project.config.js file
@@ -229,10 +249,14 @@ app.use('/', express.static(PROJECT_CONFIG.DIRECTORY.STATIC_DIR));
 // Handles all possible routes to send the appropriate HTML file
 app.get(['/', '/:lang', '/:lang/:page', '/:lang/:page/*', '*'], (req, res, next) => {
     
+    req.params.url = req.url;
+    
     let options = routeHandler(req.params);
     
     
     if (options.redirect) {
+        options.redirect.url = `${getProtocol(req)}://${app.get('env') === 'production' ? req.hostname : req.headers.host}${options.redirect.url}`;
+        
         alertHandler({
             type: 'info',
             message: `Redirected: ${JSON.stringify(options)}`
