@@ -17,12 +17,13 @@ const PROJECT_CONFIG = require('./config/project.config.js');
 
 
 // USEFUL FUNCTIONS
-// To display a console log message in four types: success, info, warning and error
+// To display a console log message in five types: normal, success, info, warning and error
 function alertHandler (args) {
     
     args = args || {};
     
     let types = {
+        normal: 'white',
         success: 'green',
         info: 'blue',
         warning: 'yellow',
@@ -33,7 +34,7 @@ function alertHandler (args) {
         message = args.message || 'Remember to specify necessary property type & message in a configuration object.',
         color = types[type],
         messageTemplate = `
-**~~~~~~~~* ${title.toUpperCase()} LOG - OPEN *~~~~~~~~**
+**~~~~~~~~* ${title.toUpperCase()} LOG - OPEN *~~~~~~~~~**
 ${message}
 **~~~~~~~~* ${title.toUpperCase()} LOG - CLOSE *~~~~~~~~**`;
     
@@ -66,7 +67,7 @@ function createPageRedirect (args) {
     let self = {
         statusCode: args.statusCode || PROJECT_CONFIG.HTTP_CODE.REDIRECT,
         redirect: {
-            url: args.url || createFullUrl(PROJECT_CONFIG.LANGUAGES[0], getPage( {param: 'name', value: '404 page'} ).url)
+            url: args.url || createFullUrl(args.lang || PROJECT_CONFIG.LANGUAGES[0], getPage( {param: 'name', value: args.name || PROJECT_CONFIG[404].NAME} ).url || getPage( {param: 'name', value: PROJECT_CONFIG.REDIRECT.NAME} ).url)
         }
     };
     
@@ -75,21 +76,26 @@ function createPageRedirect (args) {
 };
 
 
-// To get supported language as a value (string) or false (boolean)
+// To get supported language as a value (string)
 function getLang (arg) {
     
-    return PROJECT_CONFIG.LANGUAGES.includes(arg) ? arg : false;
+    return {
+        value: PROJECT_CONFIG.LANGUAGES.includes(arg) ? arg : false,
+        existed: arg ? true : false
+    }
     
 };
 
 
-// To get existed page as a value (object) or false (boolean)
+// To get existed page as a value (object)
 function getPage (args) {
     
     args = args || {};
     
     if (!args.value) {
-        return false;
+        return {
+            existed: false
+        };
     }
     
     let searchTypes = ['name', 'url'],
@@ -102,12 +108,15 @@ function getPage (args) {
             pages[i].statusCode = pages[i].statusCode || PROJECT_CONFIG.HTTP_CODE.SUCCESS;
             pages[i].root = pages[i].root || PROJECT_CONFIG.DIRECTORY.PAGES_DIR;
             pages[i].redirect = pages[i].redirect || false;
+            pages[i].existed = true;
             
             return pages[i];
         }
     }
     
-    return false;
+    return {
+        existed: true
+    };
     
 };
 
@@ -117,37 +126,40 @@ function routeHandler (params) {
     
     params = params || {};
     
+    let langObj = getLang(params.lang),
+        pageObj = getPage( {param: 'url', value: params.page} );
     
-    let langValue = getLang(params.lang);
-    
-    
-    if (!PROJECT_CONFIG.MAIN_PAGE.IS_URL && langValue && !params.page && !params[0]) {
-        params.page = '/';
+    if (pageObj.name) {
+        pageObj.fileFullName = createFileFullName(pageObj.fileName, langObj.value || PROJECT_CONFIG.LANGUAGES[0]);
     }
     
-    let pageObj = getPage( {param: 'url', value: params.page} );
     
-    if (pageObj) {
-        pageObj.fileFullName = createFileFullName(pageObj.fileName, langValue || PROJECT_CONFIG.LANGUAGES[0]);
+    // In case of MODE: Angular
+    if (PROJECT_CONFIG.MODE === 'Angular') {
+        return {
+            statusCode: PROJECT_CONFIG.HTTP_CODE.SUCCESS,
+            fileFullName: createFileFullName('index', langObj.value || PROJECT_CONFIG.LANGUAGES[0]),
+            root: PROJECT_CONFIG.DIRECTORY.STATIC_DIR
+        };
     }
     
     
     // Redirects in these cases to Main Page
-    if (!pageObj && (((!PROJECT_CONFIG.MAIN_PAGE.IS_URL || !langValue) && !params[0]) || ((PROJECT_CONFIG.MAIN_PAGE.IS_URL || langValue) && !params[0]) || (!langValue && params[0]))) {
-        let mainPageUrl = getPage( {param: 'name', value: PROJECT_CONFIG.MAIN_PAGE.NAME} ).url;
-        
-        return pageObj = createPageRedirect({
-            url: `/${langValue || PROJECT_CONFIG.LANGUAGES[0]}${mainPageUrl === '/' ? '' : '/' + mainPageUrl}`
-        });
+    if ((!pageObj.name && !pageObj.existed) && ((!langObj.value && !langObj.existed) || (langObj.value && !params[0]))) {
+        return createPageRedirect( {lang: langObj.value, name: PROJECT_CONFIG.MAIN_PAGE.NAME} );
     }
     
     
     // Redirects in these cases to 404 Page
-    if (!langValue || !pageObj || params[0]) {
-        pageObj = createPageRedirect({
-            url: createFullUrl(langValue || PROJECT_CONFIG.LANGUAGES[0], getPage( {param: 'name', value: PROJECT_CONFIG[404].NAME} ).url)
-        });
-    }    
+    if ((!langObj.value && langObj.existed) || (!pageObj.name && pageObj.existed) || params[0]) {
+        return createPageRedirect( {lang: langObj.value} );
+    }
+    
+    
+    // Redirects in these cases to Page, which is specified in pageObj
+    if (pageObj.redirect) {
+        return createPageRedirect( {statusCode: pageObj.statusCode, lang: langObj.value, name: pageObj.redirect.name} );
+    }
     
     
     return pageObj;
@@ -170,7 +182,7 @@ app.use(cors());
 
 // Parses incoming request bodies before your handler start, more info about BODY PARSER middleware ---> https://github.com/expressjs/body-parser#body-parser
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded( {extended: true} ));
 
 
 // Compresses response bodies for all request, more info about COMPRESSION middleware ---> https://github.com/expressjs/compression#compression
@@ -181,8 +193,8 @@ app.use(compression({threshold: 0}));
 /*
 if (app.get('env') === 'production') {
     
-    app.use(function(req, res, next) {
-        var protocol = req.get('x-forwarded-proto');
+    app.use((req, res, next) => {
+        let protocol = req.get('x-forwarded-proto');
         
         protocol === 'https' ? next() : res.redirect('https://' + req.hostname + req.url);
     });
@@ -215,25 +227,38 @@ app.use('/', express.static(PROJECT_CONFIG.DIRECTORY.STATIC_DIR));
 
 
 // Handles all possible routes to send the appropriate HTML file
-app.get(['/', '/:lang', '/:lang/:page', '/:lang/:page/*', '*'], function (req, res, next) {
+app.get(['/', '/:lang', '/:lang/:page', '/:lang/:page/*', '*'], (req, res, next) => {
     
-    var options = routeHandler(req.params);
+    let options = routeHandler(req.params);
     
     
     if (options.redirect) {
+        alertHandler({
+            type: 'info',
+            message: `Redirected: ${JSON.stringify(options)}`
+        });
+        
         return res.redirect(options.statusCode, options.redirect.url);
     }
     
-    res.status(options.statusCode).type('html').sendFile(options.fileFullName, {
-        maxAge: 86400000,
-        root: options.root
+    res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
+    
+    return res.status(options.statusCode).type('html').sendFile(options.fileFullName, {maxAge: 86400000, root: options.root}, (err) => {
+        if (err) {
+            next(err);
+        } else {
+            alertHandler({
+                type: 'success',
+                message: `Sent: ${JSON.stringify(options)}`
+            });
+        }
     });
     
 });
 
 
 // Handles HTTP errors
-app.use(function (err, req, res, next) {
+app.use((err, req, res, next) => {
     
     alertHandler({
         type: 'error',
@@ -246,20 +271,33 @@ app.use(function (err, req, res, next) {
     });
     
     
+    // In case of MODE: Angular
+    if (PROJECT_CONFIG.MODE === 'Angular') {
+        let statusCode = err.statusCode || 500;
+        
+        return res.status(statusCode).type('json').send( {error: err.message, statusCode: statusCode} );
+    }
+    
+    
     let statusCode = PROJECT_CONFIG.HTTP_CODE.SUPPORTED_ERRORS.includes(err.statusCode) ? err.statusCode : PROJECT_CONFIG.HTTP_CODE.SUPPORTED_ERRORS[0],
         options = createPageRedirect({
-            url: createFullUrl(getLang(req.params.lang) || PROJECT_CONFIG.LANGUAGES[0], getPage( {param: 'name', value: PROJECT_CONFIG[statusCode].NAME} ).url)
+            lang: req.params.lang,
+            name: PROJECT_CONFIG[statusCode].NAME
         });
     
     
-    res.redirect(options.statusCode, options.redirect.url);
+    return res.redirect(options.statusCode, options.redirect.url);
     
 });
 
 
 // Runs the server
-app.listen(app.get('port'), app.get('host'), function() {
-
-    console.log('Express server listening on port ' + app.get('port'));
-
+app.listen(app.get('port'), app.get('host'), () => {
+    
+    alertHandler({
+        type: 'normal',
+        title: 'Express server access URL',
+        message: `------>     Local: http://${app.get('host')}:${app.get('port')}              <------`
+    });
+    
 });
