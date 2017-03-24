@@ -241,8 +241,6 @@ app.get(['/', '/:lang', '/:lang/:page', '/:lang/:page/*', '*'], (req, res, next)
         return res.redirect(options.statusCode, options.redirect.url);
     }
     
-    res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
-    
     return res.status(options.statusCode).type('html').sendFile(options.fileFullName, {maxAge: 86400000, root: options.root}, (err) => {
         if (err) {
             next(err);
