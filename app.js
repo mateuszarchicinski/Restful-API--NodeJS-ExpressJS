@@ -297,7 +297,7 @@ app.use((err, req, res, next) => {
     if (PROJECT_CONFIG.MODE === 'Angular') {
         let statusCode = err.statusCode || 500;
         
-        return res.status(statusCode).type('json').send( {error: err.message, statusCode: statusCode} );
+        return res.status(statusCode).type('json').send( {message: err.message, statusCode: statusCode} );
     }
     
     

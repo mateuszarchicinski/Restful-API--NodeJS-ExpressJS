@@ -9,9 +9,11 @@ API in currently available configuration has:
 - enabled all Cross-Origin Resource Sharing (CORS) requests via <a href="https://github.com/expressjs/cors#cors" target="_blank" rel="help">cors</a> middleware,
 - parser incoming request bodies before your handler start via <a href="https://github.com/expressjs/body-parser#body-parser" target="_blank" rel="help">body-parser</a> middleware,
 - compressor response bodies for all request via <a href="https://github.com/expressjs/compression#compression" target="_blank" rel="help">compression</a> middleware,
-- simple routing which allows navigating through pages in different languages (/pl or /en).
+- **Normal** and **Angular** modes of routing which handling all possible routes and allows to navigating through pages in different languages (/pl or /en).
 
-This configuration is related to my other project <a href="https://github.com/mateuszarchicinski/Angular1.x-Template" target="_blank" rel="help">Angular 1.x - Template</a> in which I use Restful API server-side to return main application file (index-pl.html or index-en.html) and the rest of routing takes place on client side.
+Check out what exactly has changed in the latest version of the Restful API <a href="https://github.com/mateuszarchicinski/Restful-API--NodeJS-ExpressJS/releases/tag/1.0.1" target="_blank" rel="help">here</a>.
+
+Angular mod is related to my other project <a href="https://github.com/mateuszarchicinski/Angular1.x-Template" target="_blank" rel="help">Angular 1.x - Template</a> in which I use Restful API server-side to return main application file (index-pl.html or index-en.html) and the rest of routing takes place on client side.
 
 ## Usage
 Project is available only via Github repository.
