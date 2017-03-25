@@ -13,7 +13,7 @@ API in currently available configuration has:
 
 Check out what exactly has changed in the latest version of the Restful API <a href="https://github.com/mateuszarchicinski/Restful-API--NodeJS-ExpressJS/releases/tag/1.0.1" target="_blank" rel="help">here</a>.
 
-Angular mod is related to my other project <a href="https://github.com/mateuszarchicinski/Angular1.x-Template" target="_blank" rel="help">Angular 1.x - Template</a> in which I use Restful API server-side to return main application file (index-pl.html or index-en.html) and the rest of routing takes place on client side.
+**Angular** mod is related to my other project <a href="https://github.com/mateuszarchicinski/Angular1.x-Template" target="_blank" rel="help">Angular 1.x - Template</a> in which I use Restful API server-side to return main application file (index-pl.html or index-en.html) and the rest of routing takes place on client side.
 
 ## Usage
 Project is available only via Github repository.
