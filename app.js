@@ -13,7 +13,7 @@ const express = require('express'),
 
 
 // PROJECT CONFIG
-const PROJECT_CONFIG = require('./config/project.config.js');
+const PROJECT_CONFIG = require('./config/app.config.js');
 
 
 // USEFUL FUNCTIONS
@@ -224,7 +224,7 @@ if (app.get('env') === 'production') {
 
 
 // Serves static files from the directory, which is defined in the project.config.js file
-app.use('/', express.static(PROJECT_CONFIG.DIRECTORY.STATIC_DIR));
+app.use('/', express.static(`${__dirname}${PROJECT_CONFIG.DIRECTORY.STATIC_DIR}`));
 
 
 ////////////////////////////////////
@@ -265,7 +265,7 @@ app.get(['/', '/:lang', '/:lang/:page', '/:lang/:page/*', '*'], (req, res, next)
         return res.redirect(options.statusCode, options.redirect.url);
     }
     
-    return res.status(options.statusCode).type('html').sendFile(options.fileFullName, {maxAge: 86400000, root: options.root}, (err) => {
+    return res.status(options.statusCode).type('html').sendFile(options.fileFullName, {root: `${__dirname}${options.root}`}, (err) => {
         if (err) {
             next(err);
         } else {
@@ -316,10 +316,6 @@ app.use((err, req, res, next) => {
 // Runs the server
 app.listen(app.get('port'), app.get('host'), () => {
     
-    alertHandler({
-        type: 'normal',
-        title: 'Express server access URL',
-        message: `------>     Local: http://${app.get('host')}:${app.get('port')}              <------`
-    });
+    console.log(`${chalk.blue('[Restful API]')} Listening on address: http://${app.get('host')}:${app.get('port')}`);
     
 });
