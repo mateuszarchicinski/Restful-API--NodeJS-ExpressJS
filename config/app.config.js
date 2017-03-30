@@ -23,7 +23,7 @@ module.exports = {
             url: 'home',
             fileName: 'index',
             type: 'main',
-            root: __dirname + '/../public/'
+            root: '/assets'
         },
         { // Example page type: normal
             name: 'dashboard page',
@@ -66,7 +66,7 @@ module.exports = {
     CONFIG_FILE: 'project.config.js',
     DATA_FILE: 'project.data.json',
     DIRECTORY: {
-        STATIC_DIR: __dirname + '/../public/', // Static files directory
-        PAGES_DIR: __dirname + '/../public/pages/' // Pages files directory
+        STATIC_DIR: '/assets', // Static files directory
+        PAGES_DIR: '/assets/pages' // Pages files directory
     }
 };
